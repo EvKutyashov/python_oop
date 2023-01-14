@@ -1,20 +1,15 @@
+from dataclasses import dataclass
+from typing import Dict, Type
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-    def __init__(
-        self,
-        training_type: str,
-        duration: float,
-        distance: float,
-        speed: float,
-        calories: float
-    ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         return (
@@ -79,12 +74,6 @@ class Running(Training):
         self.duration = duration
         self.weight = weight
 
-    def get_distance(self) -> float:
-        return super().get_distance()
-
-    def get_mean_speed(self) -> float:
-        return super().get_mean_speed()
-
     def get_spent_calories(self) -> float:
         calories = ((self.CALORIES_MEAN_SPEED_MULTIPLIER
                     * self.get_mean_speed()
@@ -95,10 +84,10 @@ class Running(Training):
 
 class SportsWalking(Training):
 
-    CALORIES_WEIGHT_MULTIPLIER = 0.035
-    CALORIES_SPEED_HEIGHT_MULTIPLIER = 0.029
-    KMH_IN_MSEC = 0.278
-    CM_IN_M = 100
+    CALORIES_WEIGHT_MULTIPLIER: float = 0.035
+    CALORIES_SPEED_HEIGHT_MULTIPLIER: float = 0.029
+    KMH_IN_MSEC: float = 0.278
+    CM_IN_M: int = 100
     """Тренировка: спортивная ходьба."""
     def __init__(self,
                  action: int,
@@ -111,12 +100,6 @@ class SportsWalking(Training):
         self.duration = duration
         self.weight = weight
         self.height = height
-
-    def get_distance(self) -> float:
-        return super().get_distance()
-
-    def get_mean_speed(self) -> float:
-        return super().get_mean_speed()
 
     def get_spent_calories(self) -> float:
         calories = (self.CALORIES_WEIGHT_MULTIPLIER * self.weight
@@ -160,11 +143,13 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training_types = {"SWM": Swimming, "RUN": Running, "WLK": SportsWalking}
+    training_types: Dict[str, Type[Training]] = {"SWM": Swimming,
+                                                 "RUN": Running,
+                                                 "WLK": SportsWalking}
     if workout_type in training_types:
         return training_types[workout_type](*data)
     else:
-        return Running(*data)
+        raise AttributeError('Неверный тип тренировки')
 
 
 def main(training: Training) -> None:
@@ -174,7 +159,7 @@ def main(training: Training) -> None:
 
 
 if __name__ == '__main__':
-    packages = [
+    packages: Dict[str, int] = [
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
